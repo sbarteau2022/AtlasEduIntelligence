@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ATLAS — Powered by ElleAi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    /* mashed palette — dark ink from atlas, navy + cream from optimus, shared gold */
+    --ink:       #0a1322;
+    --ink2:      #0c1a30;
+    --ink3:      #0f2138;
+    --navy:      #0d1e3a;
+    --navy-mid:  #1a3058;
+    --cream:     #f6f1e7;
+    --cream2:    #efe7d9;
+    --paper:     #fbf8f2;
+
+    --gold:       #bf8e2c;
+    --gold-light: #e3b955;
+    --gold-deep:  #9c7320;
+    --gold-dim:   rgba(191,142,44,0.28);
+
+    --bone:      #ece2d2;
+    --bone-mid:  #b9ac99;
+    --bone-dim:  #7d7160;
+    --text-dark: #0d1e3a;
+    --text-mid:  #3a4a5c;
+    --text-dim:  #6b7a8d;
+    --text-light:#9aa3ae;
+
+    --border-d: rgba(255,255,255,0.08);
+    --border-l: rgba(13,30,58,0.10);
+
+    --font-display: 'Cinzel', serif;
+    --font-serif:   'Cormorant Garamond', serif;
+    --font-ui:      'DM Sans', sans-serif;
+
+    --spin: 14s; /* seconds per revolution, controlled by tweaks */
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--ink); color: var(--bone); font-family: var(--font-serif); overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ ATLAS MARK (real emblem + soft halo) ============ */
+  .atlas-mark { position: relative; display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
+  .atlas-mark img { width: 100%; height: auto; display: block; position: relative; z-index: 1; }
+  .atlas-mark::before {
+    content: ""; position: absolute; left: 50%; top: 44%; transform: translate(-50%,-50%);
+    width: 132%; height: 132%; border-radius: 50%; z-index: 0;
+    background: radial-gradient(circle, rgba(246,241,231,0.82) 0%, rgba(246,241,231,0.32) 38%, transparent 66%);
+  }
+  nav.light .nav-logo .atlas-mark::before { opacity: 0; }
+
+  /* ============ NAV ============ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; gap: 22px;
+    padding: 0 40px; height: 70px;
+    background: rgba(10,19,34,0.72); backdrop-filter: blur(20px) saturate(1.2);
+    border-bottom: 1px solid var(--border-d);
+    transition: background 0.45s ease, border-color 0.45s ease, color 0.45s ease;
+  }
+  nav.light {
+    background: rgba(246,241,231,0.85); border-bottom: 1px solid var(--border-l);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .nav-logo .atlas-mark { width: 40px; color: var(--gold-light); }
+  nav.light .nav-logo .atlas-mark { color: var(--gold-deep); }
+  .logo-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; letter-spacing: 0.20em; line-height: 1; color: var(--bone); transition: color 0.45s; }
+  nav.light .logo-name { color: var(--navy); }
+  .logo-sub { font-family: var(--font-ui); font-size: 8px; color: var(--gold-light); letter-spacing: 0.12em; margin-top: 3px; }
+  nav.light .logo-sub { color: var(--gold-deep); }
+  .nav-divider { width: 1px; height: 30px; background: var(--border-d); flex-shrink: 0; transition: background 0.45s; }
+  nav.light .nav-divider { background: var(--border-l); }
+  .nav-initiative { font-family: var(--font-ui); font-size: 9px; line-height: 1.6; color: var(--bone-dim); flex-shrink: 0; transition: color 0.45s; }
+  .nav-initiative span { color: var(--bone-mid); }
+  nav.light .nav-initiative { color: var(--text-light); }
+  nav.light .nav-initiative span { color: var(--text-dim); }
+  .nav-links { display: flex; gap: 22px; margin-left: auto; }
+  .nav-links a { font-family: var(--font-ui); font-size: 11px; color: var(--bone-dim); letter-spacing: 0.04em; transition: color 0.2s; cursor: pointer; }
+  .nav-links a:hover { color: var(--gold-light); }
+  nav.light .nav-links a { color: var(--text-dim); }
+  nav.light .nav-links a:hover { color: var(--navy); }
+  .nav-btns { display: flex; gap: 8px; margin-left: 16px; flex-shrink: 0; }
+  .btn { font-family: var(--font-ui); font-size: 10.5px; letter-spacing: 0.04em; font-weight: 500; cursor: pointer; padding: 9px 18px; transition: all 0.22s; border: none; }
+  .btn-outline { background: transparent; color: var(--bone); border: 1.5px solid rgba(255,255,255,0.22); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold-light); }
+  nav.light .btn-outline { color: var(--navy); border-color: rgba(13,30,58,0.25); }
+  nav.light .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-gold { background: linear-gradient(135deg, var(--gold-deep), var(--gold-light)); color: #14110a; font-weight: 600; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
+  .btn-gold:hover { box-shadow: 0 6px 24px rgba(191,142,44,0.4); transform: translateY(-1px); }
+
+  /* ============ HERO (dark) ============ */
+  .hero { min-height: 100vh; position: relative; display: flex; align-items: center; padding: 120px 40px 70px; overflow: hidden; }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 90% 80% at 62% 38%, #11264e 0%, transparent 55%),
+      radial-gradient(ellipse 70% 60% at 80% 66%, #0a2247 0%, transparent 50%),
+      linear-gradient(160deg, var(--ink) 0%, var(--ink2) 60%, var(--ink) 100%); }
+  /* gold marble veins (from light) bleeding into the dark hero */
+  .hero-veins { position: absolute; inset: 0; opacity: 0.16; pointer-events: none; mix-blend-mode: screen; }
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star { position: absolute; border-radius: 50%; background: #fff; }
+  @keyframes shimmer { 0%,100%{opacity:0.15} 50%{opacity:0.7} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  @keyframes ringPulse { 0%{opacity:0.5;transform:scale(1)} 100%{opacity:0;transform:scale(1.14)} }
+
+  .hero-content { position: relative; z-index: 3; max-width: 1240px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center; }
+  .eyebrow { font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 22px; display: flex; align-items: center; gap: 12px; animation: fadeUp 0.8s ease both; }
+  .eyebrow::before { content:""; width: 34px; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+  .hero-headline { font-family: var(--font-display); font-size: clamp(54px, 7vw, 92px); font-weight: 500; line-height: 0.98; letter-spacing: -0.01em; color: var(--bone); animation: fadeUp 0.9s ease both; }
+  .hero-headline .give { color: var(--gold-light); font-style: normal; }
+  .hero-rule { width: 56px; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); margin: 26px 0; }
+  .hero-sub { font-family: var(--font-serif); font-size: 21px; font-weight: 400; line-height: 1.5; color: var(--bone); max-width: 470px; margin-bottom: 16px; animation: fadeUp 0.9s 0.12s ease both; }
+  .hero-body { font-family: var(--font-ui); font-size: 12.5px; line-height: 1.85; color: var(--bone-mid); max-width: 440px; margin-bottom: 8px; animation: fadeUp 0.9s 0.2s ease both; }
+  .hero-body strong { color: var(--bone); font-weight: 600; }
+  .hero-ctas { display: flex; gap: 12px; margin-top: 36px; animation: fadeUp 0.9s 0.3s ease both; }
+  .btn-hero-gold { background: linear-gradient(135deg, var(--gold-deep), var(--gold-light)); color: #14110a; font-family: var(--font-ui); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; padding: 14px 30px; border: none; cursor: pointer; transition: all 0.2s; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+  .btn-hero-gold:hover { box-shadow: 0 8px 28px rgba(191,142,44,0.45); transform: translateY(-1px); }
+  .btn-hero-ghost { background: transparent; color: var(--bone); border: 1.5px solid rgba(255,255,255,0.25); font-family: var(--font-ui); font-size: 12px; letter-spacing: 0.04em; padding: 13px 26px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 9px; }
+  .btn-hero-ghost:hover { border-color: var(--gold); color: var(--gold-light); }
+
+  /* hero logo stage */
+  .hero-stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 520px; animation: fadeUp 1s 0.2s ease both; }
+  .stage-glow { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(20,60,140,0.55) 0%, rgba(12,40,100,0.28) 42%, transparent 70%); animation: floaty 8s ease-in-out infinite; }
+  .stage-ring { position: absolute; border-radius: 50%; border: 1px solid var(--gold-dim); }
+  .stage-ring.r1 { width: 430px; height: 430px; animation: ringPulse 4.5s ease-out infinite; }
+  .stage-ring.r2 { width: 430px; height: 430px; animation: ringPulse 4.5s ease-out infinite 1.6s; }
+  .hero-mark { position: relative; width: 410px; max-width: 80vw; z-index: 2; animation: floaty 8s ease-in-out infinite; }
+  .emblem-stage { position: relative; width: 100%; }
+  .medallion {
+    position: absolute; left: 53%; top: 29%; transform: translate(-50%,-50%);
+    width: 116%; height: 92%; border-radius: 50%; z-index: 0;
+    background: radial-gradient(circle, rgba(247,242,232,0.95) 0%, rgba(239,231,217,0.55) 38%, rgba(246,241,231,0.14) 60%, transparent 72%);
+  }
+  .hero-emblem { position: relative; width: 100%; display: block; z-index: 2; filter: drop-shadow(0 26px 46px rgba(0,0,0,0.45)); }
+  .globe-spin { position: absolute; left: 48.2%; top: 25.6%; transform: translate(-50%,-50%); width: 58.6%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; z-index: 2; pointer-events: none; }
+  .globe-spin img { position: absolute; width: 171%; left: -32%; top: 6.4%; max-width: none; transform-origin: 48.2% 25.6%; animation: globeSpin calc(var(--spin) * 0.55) ease-in-out infinite alternate; }
+  @keyframes globeSpin { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+  .orbit { position: absolute; left: 53%; top: 25.5%; transform: translate(-50%,-50%); width: 70%; aspect-ratio: 1; z-index: 3; pointer-events: none; perspective: 620px; transform-style: preserve-3d; }
+  .orbit .ring { position: absolute; border-radius: 50%; }
+  .ring-a { inset: 0; border: 2px solid; border-color: var(--gold-light) transparent var(--gold) transparent; opacity: 0.92; animation: orbitA var(--spin) linear infinite; }
+  .ring-b { inset: 8%; border: 1.5px solid; border-color: transparent var(--gold-light) transparent var(--gold-deep); opacity: 0.55; animation: orbitB calc(var(--spin) * 1.6) linear infinite reverse; }
+  @keyframes orbitA { from { transform: rotateX(73deg) rotateZ(0); } to { transform: rotateX(73deg) rotateZ(360deg); } }
+  @keyframes orbitB { from { transform: rotateX(66deg) rotateY(20deg) rotateZ(0); } to { transform: rotateX(66deg) rotateY(20deg) rotateZ(360deg); } }
+  .hero-mark .label { text-align: center; margin-top: 22px; font-family: var(--font-display); letter-spacing: 0.44em; font-size: 22px; font-weight: 600; color: var(--bone); padding-left: 0.44em; }
+  .hero-mark .label-sub { text-align: center; margin-top: 9px; font-family: var(--font-serif); font-style: italic; font-size: 15px; letter-spacing: 0.02em; color: var(--gold-light); }
+
+  /* ============ SECTION SCAFFOLD ============ */
+  section { position: relative; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+  .section-tag { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 16px; }
+  .seam { height: 2px; border: none; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5; }
+
+  /* ============ IMPACT (light) ============ */
+  .impact { padding: 84px 0; background: var(--cream); color: var(--text-dark); }
+  .impact-grid { display: grid; grid-template-columns: 340px 1fr; gap: 60px; align-items: center; }
+  .impact-heading { font-family: var(--font-display); font-size: clamp(28px, 3.2vw, 40px); font-weight: 600; color: var(--navy); line-height: 1.16; margin-bottom: 18px; }
+  .impact-body { font-family: var(--font-ui); font-size: 12.5px; line-height: 1.85; color: var(--text-mid); margin-bottom: 10px; }
+  .lgb-nodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border-l); }
+  .lgb-node { padding: 34px 26px; text-align: center; border-right: 1px solid var(--border-l); background: var(--paper); }
+  .lgb-node:last-child { border-right: none; }
+  .lgb-icon { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--gold-dim); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; background: rgba(191,142,44,0.06); color: var(--gold-deep); }
+  .lgb-icon svg { width: 26px; height: 26px; }
+  .lgb-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--navy); margin-bottom: 9px; }
+  .lgb-title.give { color: var(--gold-deep); }
+  .lgb-desc { font-family: var(--font-ui); font-size: 11px; line-height: 1.7; color: var(--text-dim); }
+  .btn-dark { background: var(--navy); color: #fff; font-family: var(--font-ui); font-size: 10.5px; letter-spacing: 0.05em; font-weight: 500; padding: 12px 24px; border: none; cursor: pointer; margin-top: 26px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .btn-dark:hover { background: var(--navy-mid); }
+
+  /* ============ THREE COL (light) ============ */
+  .three { padding: 84px 0; background: var(--cream2); color: var(--text-dark); border-top: 1px solid var(--border-l); }
+  .three-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .three-col { padding: 0 36px; border-right: 1px solid var(--border-l); }
+  .three-col:first-child { padding-left: 0; }
+  .three-col:last-child { border-right: none; padding-right: 0; }
+  .col-heading { font-family: var(--font-display); font-size: 23px; font-weight: 600; color: var(--navy); line-height: 1.22; margin-bottom: 18px; }
+  .col-body { font-family: var(--font-ui); font-size: 12px; line-height: 1.85; color: var(--text-mid); margin-bottom: 10px; }
+  .btn-text { background: transparent; border: 1.5px solid rgba(13,30,58,0.2); color: var(--text-mid); font-family: var(--font-ui); font-size: 10px; letter-spacing: 0.05em; font-weight: 500; padding: 10px 18px; cursor: pointer; margin-top: 22px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .btn-text:hover { border-color: var(--navy); color: var(--navy); }
+  .feature-row { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--border-l); font-family: var(--font-ui); font-size: 11.5px; color: var(--text-mid); }
+  .feature-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .serve-row { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--border-l); cursor: pointer; }
+  .serve-row:hover .serve-arrow { color: var(--navy); transform: translateX(3px); }
+  .serve-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--navy); color: var(--gold-light); }
+  .serve-icon svg { width: 18px; height: 18px; }
+  .serve-title { font-family: var(--font-ui); font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .serve-desc { font-family: var(--font-ui); font-size: 10.5px; line-height: 1.6; color: var(--text-dim); }
+  .serve-arrow { margin-left: auto; color: rgba(13,30,58,0.22); font-size: 18px; transition: all 0.2s; flex-shrink: 0; align-self: center; }
+
+  /* ============ STATS (dark band) ============ */
+  .stats { padding: 80px 0; background: linear-gradient(180deg, var(--ink2) 0%, var(--ink) 100%); border-top: 1px solid var(--gold-dim); }
+  .stats-grid { display: grid; grid-template-columns: 300px 1fr; gap: 56px; align-items: start; }
+  .stats-heading { font-family: var(--font-display); font-size: 30px; font-weight: 500; color: var(--bone); line-height: 1.2; margin-bottom: 14px; }
+  .stats-sub { font-family: var(--font-ui); font-size: 12px; line-height: 1.7; color: var(--bone-mid); }
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 26px; }
+  .stat-item { border-top: 2px solid var(--gold); padding-top: 16px; }
+  .stat-val { font-family: var(--font-display); font-size: 38px; font-weight: 600; color: var(--gold-light); line-height: 1; letter-spacing: -0.02em; }
+  .stat-label { font-family: var(--font-ui); font-size: 10.5px; line-height: 1.5; color: var(--bone-mid); margin-top: 8px; }
+
+  /* ============ FOOTER (deep dark) ============ */
+  footer { background: #060d18; border-top: 1px solid var(--border-d); padding: 60px 40px 30px; }
+  .footer-grid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 72px; margin-bottom: 42px; }
+  .footer-brand-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: 0.2em; color: var(--bone); }
+  .footer-brand-powered { font-family: var(--font-ui); font-size: 8px; color: var(--gold-light); letter-spacing: 0.12em; margin-top: 3px; }
+  .footer-initiative { font-family: var(--font-ui); font-size: 9px; color: var(--bone-dim); margin-top: 13px; line-height: 1.6; }
+  .footer-initiative span { color: var(--bone-mid); }
+  .footer-body { font-family: var(--font-ui); font-size: 10.5px; line-height: 1.75; color: #4b5563; margin-top: 16px; max-width: 240px; }
+  .footer-tagline { font-family: var(--font-ui); font-size: 11px; color: var(--gold); font-weight: 500; margin-top: 14px; line-height: 1.6; }
+  .footer-links-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+  .footer-col-title { font-family: var(--font-ui); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; font-weight: 600; }
+  .footer-link { font-family: var(--font-ui); font-size: 11px; color: #4b5563; display: block; margin-bottom: 10px; transition: color 0.2s; cursor: pointer; }
+  .footer-link:hover { color: var(--gold-light); }
+  .footer-bottom { max-width: 1240px; margin: 0 auto; border-top: 1px solid var(--border-d); padding-top: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .footer-copy { font-family: var(--font-ui); font-size: 10px; color: #3a4757; }
+  .social-row { display: flex; gap: 8px; }
+  .social-btn { width: 28px; height: 28px; border: 1px solid var(--border-d); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-ui); font-size: 10px; color: #4b5563; cursor: pointer; transition: all 0.2s; }
+  .social-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+  .email-row { display: flex; }
+  .email-input { padding: 9px 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-d); border-right: none; color: var(--bone); font-family: var(--font-ui); font-size: 10px; outline: none; width: 200px; }
+  .email-input::placeholder { color: var(--bone-dim); }
+  .email-btn { background: linear-gradient(135deg, var(--gold-deep), var(--gold-light)); color: #14110a; border: none; padding: 9px 14px; font-size: 13px; cursor: pointer; }
+
+  /* ============ REVEAL ============ */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 940px) {
+    .hero-content, .impact-grid, .stats-grid, .three-grid, .footer-grid { grid-template-columns: 1fr; }
+    .hero-stage { min-height: 380px; order: -1; }
+    .nav-links, .nav-initiative, .nav-divider { display: none; }
+    .three-col { border-right: none; border-bottom: 1px solid var(--border-l); padding: 24px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav id="nav">
+  <div class="nav-logo">
+    <span class="atlas-mark" style="width:42px;"><img src="atlas-emblem.png" alt="Atlas" /></span>
+    <div>
+      <div class="logo-name">ATLAS</div>
+      <div class="logo-sub">Powered by ElleAi</div>
+    </div>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-initiative">An initiative of<br><span>The Ethical Intelligence Project</span></div>
+  <div class="nav-links">
+    <a>Mission</a><a>Learning Paths</a><a>Custom Courses</a>
+    <a>AI Mentor</a><a>Research</a><a>For Institutions</a><a>About</a>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-outline">Sign In</button>
+    <button class="btn btn-gold">Start Learning &rarr;</button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero" data-screen-label="Hero">
+  <div class="hero-bg"></div>
+  <svg class="hero-veins" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" fill="none">
+    <path d="M900 -20 Q1100 200 950 420 Q800 640 1050 880" stroke="#e3b955" stroke-width="1.4" opacity="0.6"/>
+    <path d="M1180 60 Q1240 320 1080 520 Q930 720 1200 900" stroke="#e3b955" stroke-width="1" opacity="0.4"/>
+    <path d="M760 120 Q900 320 820 520 Q740 700 980 820" stroke="#e3b955" stroke-width="0.8" opacity="0.35"/>
+  </svg>
+  <div class="stars" id="stars"></div>
+
+  <div class="hero-content">
+    <div>
+      <div class="eyebrow">The Ethical Intelligence Project</div>
+      <h1 class="hero-headline">Learn.<br>Grow.<br><span class="give">Give.</span></h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub">An ethical intelligence ecosystem that uses adaptive learning to close the information gap — at scale.</p>
+      <p class="hero-body">Atlas is powered by ElleAi and developed through The Ethical Intelligence Project. We help learners <strong>build understanding</strong>, not simply consume information.</p>
+      <p class="hero-body">Knowledge should never depend on income, geography, or reading level. So we carry it for everyone.</p>
+      <div class="hero-ctas">
+        <button class="btn-hero-gold">Start Learning &rarr;</button>
+        <button class="btn-hero-ghost">&#9654;&nbsp; Explore Programs</button>
+      </div>
+    </div>
+
+    <div class="hero-stage">
+      <div class="stage-glow"></div>
+      <div class="stage-ring r1"></div>
+      <div class="stage-ring r2"></div>
+      <div class="hero-mark">
+        <div class="emblem-stage">
+          <div class="medallion"></div>
+          <img class="hero-emblem" src="atlas-emblem.png" alt="Atlas bearing the spinning world" />
+          <div class="globe-spin"><img src="atlas-emblem.png" alt="" /></div>
+          <div class="orbit">
+            <span class="ring ring-a"></span>
+            <span class="ring ring-b"></span>
+          </div>
+        </div>
+        <div class="label">ATLAS</div>
+        <div class="label-sub">He carries the world, so everyone can learn it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="seam" />
+
+<!-- ============ IMPACT (light) ============ -->
+<section class="impact" data-screen-label="Impact">
+  <div class="container">
+    <div class="impact-grid reveal">
+      <div>
+        <span class="section-tag">Our Impact Model</span>
+        <h2 class="impact-heading">One Membership.<br>Multiple Futures.</h2>
+        <p class="impact-body">Every full-price Atlas membership directly supports three free learning accounts for students, educators, and individuals who need educational support the most.</p>
+        <p class="impact-body">Through grants, partnerships, and community sponsorships, we're building a sustainable pathway toward educational equity.</p>
+        <button class="btn-dark">See How It Works &rarr;</button>
+      </div>
+      <div class="lgb-nodes">
+        <div class="lgb-node">
+          <div class="lgb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H11v15H5.5A2.5 2.5 0 0 0 3 21.5V6.5Z"/><path d="M21 6.5A2.5 2.5 0 0 0 18.5 4H13v15h5.5A2.5 2.5 0 0 1 21 21.5V6.5Z"/></svg></div>
+          <div class="lgb-title">Learn.</div>
+          <div class="lgb-desc">Personalized learning experiences powered by adaptive intelligence.</div>
+        </div>
+        <div class="lgb-node">
+          <div class="lgb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21c0-5 0-8 0-8M12 13c-4 0-7-2-7-6 4 0 7 2 7 6Zm0 0c0-4 3-6 7-6 0 4-3 6-7 6Z"/></svg></div>
+          <div class="lgb-title">Grow.</div>
+          <div class="lgb-desc">Develop critical thinking, comprehension, and lifelong learning skills.</div>
+        </div>
+        <div class="lgb-node">
+          <div class="lgb-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-9.2A4.1 4.1 0 0 1 12 7.6 4.1 4.1 0 0 1 19 10.8C19 15.6 12 20 12 20Z"/></svg></div>
+          <div class="lgb-title give">Give.</div>
+          <div class="lgb-desc">Your membership funds educational access for three learners in need.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THREE COL (light) ============ -->
+<section class="three" data-screen-label="Pillars">
+  <div class="container">
+    <div class="three-grid">
+      <div class="three-col reveal">
+        <span class="section-tag">The Mission</span>
+        <h3 class="col-heading">Closing the Information Gap</h3>
+        <p class="col-body">Millions of learners face barriers created by geography, income, resource availability, or reading comprehension challenges.</p>
+        <p class="col-body">The Ethical Intelligence Project exists to change that. We believe access to understanding should not depend on circumstance.</p>
+        <p class="col-body">Through adaptive technology and community-supported access, we build educational infrastructure that meets learners where they are.</p>
+        <button class="btn-text">Learn More About Our Mission &rarr;</button>
+      </div>
+      <div class="three-col reveal" style="transition-delay:0.1s">
+        <span class="section-tag">Powered by ElleAi</span>
+        <h3 class="col-heading">Intelligence in Service of Understanding</h3>
+        <p class="col-body">ElleAi was built around one principle: artificial intelligence should strengthen human understanding, not replace it.</p>
+        <div style="margin:14px 0 0;">
+          <div class="feature-row"><div class="feature-dot"></div>Adaptive learning pathways</div>
+          <div class="feature-row"><div class="feature-dot"></div>Reading comprehension support</div>
+          <div class="feature-row"><div class="feature-dot"></div>Knowledge-gap identification</div>
+          <div class="feature-row"><div class="feature-dot"></div>Personalized course generation</div>
+          <div class="feature-row"><div class="feature-dot"></div>Transparent, explainable guidance</div>
+          <div class="feature-row"><div class="feature-dot"></div>Ethical AI interaction</div>
+        </div>
+        <button class="btn-text">Learn More About ElleAi &rarr;</button>
+      </div>
+      <div class="three-col reveal" style="transition-delay:0.2s">
+        <span class="section-tag">Who We Serve</span>
+        <div class="serve-row">
+          <div class="serve-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4 2 9l10 5 10-5-10-5Z"/><path d="M6 11v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg></div>
+          <div><div class="serve-title">Students</div><div class="serve-desc">Personalized learning that adapts to your pace and goals.</div></div>
+          <div class="serve-arrow">&rsaquo;</div>
+        </div>
+        <div class="serve-row">
+          <div class="serve-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="3.2"/><path d="M5 21c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></div>
+          <div><div class="serve-title">Educators</div><div class="serve-desc">Tools that extend impact and improve learner outcomes.</div></div>
+          <div class="serve-arrow">&rsaquo;</div>
+        </div>
+        <div class="serve-row">
+          <div class="serve-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V9l7-4 7 4v12M9 21v-5h6v5"/></svg></div>
+          <div><div class="serve-title">Schools &amp; Organizations</div><div class="serve-desc">Scalable educational infrastructure for equity and measurable results.</div></div>
+          <div class="serve-arrow">&rsaquo;</div>
+        </div>
+        <div class="serve-row">
+          <div class="serve-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5.5C8 4.7 8.7 4 9.5 4h5c.8 0 1.5.7 1.5 1.5V7"/></svg></div>
+          <div><div class="serve-title">Adult Learners</div><div class="serve-desc">Professional development and continuing education that creates impact beyond yourself.</div></div>
+          <div class="serve-arrow">&rsaquo;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS (dark) ============ -->
+<section class="stats" data-screen-label="Impact Stats">
+  <div class="container">
+    <div class="stats-grid reveal">
+      <div>
+        <h2 class="stats-heading">Real Impact.<br>Measurable Change.</h2>
+        <p class="stats-sub">Together, we're building a future where understanding has no limits.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-val">128K+</div><div class="stat-label">Learners Empowered</div></div>
+        <div class="stat-item"><div class="stat-val">36K+</div><div class="stat-label">Free Access Accounts Funded</div></div>
+        <div class="stat-item"><div class="stat-val">540+</div><div class="stat-label">Schools &amp; Community Partners</div></div>
+        <div class="stat-item"><div class="stat-val">41</div><div class="stat-label">States Reached</div></div>
+        <div class="stat-item"><div class="stat-val">1.7M+</div><div class="stat-label">Adaptive Lessons Delivered</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer data-screen-label="Footer">
+  <div class="footer-grid">
+    <div>
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;">
+        <span class="atlas-mark" style="width:38px;"><img src="atlas-emblem.png" alt="Atlas" /></span>
+        <div>
+          <div class="footer-brand-name">ATLAS</div>
+          <div class="footer-brand-powered">Powered by ElleAi</div>
+        </div>
+      </div>
+      <div class="footer-initiative">An initiative of<br><span>The Ethical Intelligence Project</span></div>
+      <p class="footer-body">Building ethical intelligence systems that strengthen human understanding, expand educational opportunity, and promote human flourishing.</p>
+      <p class="footer-tagline">Powered by ElleAi.<br>Realized through Atlas.</p>
+    </div>
+    <div class="footer-links-grid">
+      <div>
+        <div class="footer-col-title">Explore</div>
+        <a class="footer-link">Learning Paths</a>
+        <a class="footer-link">Custom Courses</a>
+        <a class="footer-link">AI Mentor</a>
+        <a class="footer-link">Resources</a>
+        <a class="footer-link">Community</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Impact</div>
+        <a class="footer-link">Our Mission</a>
+        <a class="footer-link">Impact Model</a>
+        <a class="footer-link">Grants &amp; Partnerships</a>
+        <a class="footer-link">Transparency</a>
+        <a class="footer-link">News &amp; Stories</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <a class="footer-link">Help Center</a>
+        <a class="footer-link">Contact Us</a>
+        <a class="footer-link">Accessibility</a>
+        <a class="footer-link">Privacy Policy</a>
+        <a class="footer-link">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">&copy; 2026 The Ethical Intelligence Project. All rights reserved.</div>
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span style="font-family:var(--font-ui);font-size:10px;color:#3a4757;">Follow Us</span>
+      <div class="social-row">
+        <div class="social-btn">in</div>
+        <div class="social-btn">&#120143;</div>
+        <div class="social-btn">&#9679;</div>
+        <div class="social-btn">&#9654;</div>
+      </div>
+    </div>
+    <div class="email-row">
+      <input class="email-input" placeholder="Your email address" type="email" />
+      <button class="email-btn">&rarr;</button>
+    </div>
+  </div>
+</footer>
+
+<!-- tweaks mount -->
+<div id="tweaks-root"></div>
+
+<script>
+  /* ----- starfield ----- */
+  (function () {
+    const el = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2 + 0.5;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*0.5+0.1};animation:shimmer ${2+Math.random()*3}s ease-in-out infinite;animation-delay:${Math.random()*4}s;`;
+      el.appendChild(s);
+    }
+  })();
+
+  /* ----- scroll reveal ----- */
+  (function () {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
+  })();
+
+  /* ----- nav theme switch on scroll (dark over hero, light after) ----- */
+  (function () {
+    const nav = document.getElementById('nav');
+    const hero = document.querySelector('.hero');
+    const obs = new IntersectionObserver(([e]) => {
+      nav.classList.toggle('light', !e.isIntersecting);
+    }, { rootMargin: '-65px 0px 0px 0px', threshold: 0 });
+    obs.observe(hero);
+  })();
+</script>
+
+<!-- ============ TWEAKS ============ -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+  const ACCENTS = {
+    'Classic Gold': ['#9c7320', '#bf8e2c', '#e3b955'],
+    'Bronze':       ['#8a5a2b', '#a8703a', '#d29455'],
+    'Verdigris':    ['#2f6f63', '#3f8b7c', '#6fb5a3'],
+    'Azure':        ['#235d97', '#2f6db0', '#5b97cf'],
+  };
+  const DISPLAY_FONTS = { 'Cinzel': "'Cinzel', serif", 'Playfair': "'Playfair Display', serif" };
+
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "accent": "Classic Gold",
+    "spin": 14,
+    "displayFont": "Cinzel",
+    "starfield": true
+  }/*EDITMODE-END*/;
+
+  function TweaksApp() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+    React.useEffect(() => {
+      const [deep, gold, light] = ACCENTS[t.accent] || ACCENTS['Classic Gold'];
+      const r = document.documentElement.style;
+      r.setProperty('--gold', gold);
+      r.setProperty('--gold-light', light);
+      r.setProperty('--gold-deep', deep);
+      r.setProperty('--gold-dim', deep + '47');
+    }, [t.accent]);
+
+    React.useEffect(() => { document.documentElement.style.setProperty('--spin', t.spin + 's'); }, [t.spin]);
+
+    React.useEffect(() => {
+      document.documentElement.style.setProperty('--font-display', DISPLAY_FONTS[t.displayFont]);
+    }, [t.displayFont]);
+
+    React.useEffect(() => {
+      const s = document.getElementById('stars');
+      if (s) s.style.display = t.starfield ? 'block' : 'none';
+    }, [t.starfield]);
+
+    return (
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Brand" />
+        <TweakColor label="Accent" value={ACCENTS[t.accent]}
+          options={Object.values(ACCENTS)}
+          onChange={(v) => {
+            const name = Object.keys(ACCENTS).find(k => ACCENTS[k].join() === v.join());
+            setTweak('accent', name || 'Classic Gold');
+          }} />
+        <TweakSelect label="Display font" value={t.displayFont}
+          options={Object.keys(DISPLAY_FONTS)}
+          onChange={(v) => setTweak('displayFont', v)} />
+        <TweakSection label="Globe" />
+        <TweakSlider label="Orbit speed (sec / rev)" value={t.spin} min={4} max={40} step={1}
+          onChange={(v) => setTweak('spin', v)} />
+        <TweakToggle label="Starfield" value={t.starfield}
+          onChange={(v) => setTweak('starfield', v)} />
+      </TweaksPanel>
+    );
+  }
+
+  document.documentElement.style.setProperty('--spin', TWEAK_DEFAULTS.spin + 's');
+  ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<TweaksApp />);
+</script>
+</body>
+</html>
