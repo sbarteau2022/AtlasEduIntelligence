@@ -9,12 +9,18 @@ Ethical Intelligence Project").
 public/                 Static UI (served by the Atlas Edu worker)
   index.html            The full marketing site — dropped in exactly as designed
   atlas-emblem.png      Primary brand illustration (nav / hero / footer / spinning-globe)
-src/education/          AI Engineering course — engine, tool surface, course content
-  courses/*.json        The AI Engineer Stack curriculum (12 months, 5 tracks)
-src/md-modules.d.ts     Text-module typing for the bundled FACILITATOR.md import
+src/
+  index.ts              Worker entry — serves public/ + the /api education routes
+  auth.ts               The token door (bearer -> learnerId over AUTH_TOKENS KV)
+  router.ts             Tool scoping — toolAllowed(scope, name)
+  course-source.ts      Local Fetcher serving the bundled courses to the engine
+  education/            AI Engineering course — engine, tool surface, course content
+    courses/*.json      The AI Engineer Stack curriculum (12 months, 5 tracks)
+  md-modules.d.ts       Text-module typing for the bundled FACILITATOR.md import
+wrangler.toml           Worker config (assets, D1, KV, nodejs_compat, *.md rule)
 docs/
   design-handoff.md         Design handoff notes: tokens, sections, interactions
-  education-integration.md  What the worker must wire for src/education/
+  education-integration.md  How src/education/ is wired into the worker
 ```
 
 ## UI
@@ -40,5 +46,51 @@ binding, course data source, `nodejs_compat`, the `*.md` Text rule, and the six
 
 ## Worker
 
-The Atlas Edu worker (to be built) serves the static UI in `public/` and wires
-up the education engine in `src/education/`.
+The Atlas Edu worker (`src/index.ts`) is a Cloudflare Worker with two jobs:
+
+1. **Serve the marketing site.** Anything that isn't an `/api` path is served
+   from `public/` through the `[assets]` binding.
+2. **Serve the education API.** The six education tools are exposed under
+   `/api`, behind the token door (`src/auth.ts`) and the tool gate
+   (`src/router.ts`). Course data is fed to the (unmodified) education runtime
+   from the bundled JSON via a local Fetcher (`src/course-source.ts`), so no
+   separate course-database worker is needed.
+
+### API
+
+| Method & path | Scope | Purpose |
+| --- | --- | --- |
+| `GET /api/courses` | public | Course catalog (id + title) |
+| `POST /api/admin/enroll-token` | admin | Mint a learner bearer token (`{learner}`) |
+| `POST /api/edu/enroll` | member | Enroll (`{course?}`, defaults to `ai-engineer-stack`) |
+| `POST /api/edu/log` | member | Log a session (`{unit, minutes, evidence?, note?, blocker?}`) |
+| `POST /api/edu/seal` | member | Seal a three-tier reading (`{kind, unit?, phase?, tier1, tier2, tier3}`) |
+| `POST /api/edu/complete` | member | Request unit completion (`{unit}`) — the gate decides |
+| `GET /api/edu/brief` | member | The session brief + facilitator stance |
+| `GET /api/edu/status` | member | Progress, corpus/chain state, openings (`?phase=`) |
+
+Identity comes only from the presented bearer token — a learner can act only on
+their own state; there is no learner argument to spoof.
+
+### Setup & run
+
+```sh
+npm install
+wrangler d1 create atlas-edu           # paste database_id into wrangler.toml
+wrangler kv namespace create AUTH_TOKENS # paste id into wrangler.toml
+wrangler secret put ADMIN_SECRET        # (locally: copy .dev.vars.example -> .dev.vars)
+
+npm run typecheck   # tsc --noEmit
+npm test            # vitest — the education engine + scope tests
+npm run dev         # wrangler dev
+npm run deploy      # wrangler deploy
+```
+
+Mint a learner token, then call the API:
+
+```sh
+curl -sX POST localhost:8787/api/admin/enroll-token \
+  -H "Authorization: Bearer $ADMIN_SECRET" -d '{"learner":"alice"}'
+# -> {"learner":"alice","token":"…"}
+curl -sX POST localhost:8787/api/edu/enroll -H "Authorization: Bearer <token>" -d '{}'
+```

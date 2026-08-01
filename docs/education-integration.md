@@ -5,6 +5,14 @@ worker exactly as-is. This is the deterministic **CustomCourseBuilder runtime**
 plus its worker tool surface and the course content. The Atlas Edu worker wires
 it up; nothing here was rewritten.
 
+> **Status: wired.** The requirements below are now satisfied by the worker —
+> `src/index.ts` (routes + bindings), `src/auth.ts` (the token door),
+> `src/router.ts` (`toolAllowed`), `src/course-source.ts` (course data from the
+> bundled JSON), and `wrangler.toml` (D1, KV, `nodejs_compat`, the `*.md` Text
+> rule). This file remains the reference for *what* the engine needs, so a
+> future re-sync or a second worker can re-satisfy it. See the README for the
+> HTTP API and setup steps.
+
 ## What's in `src/education/`
 
 | File | Role |
