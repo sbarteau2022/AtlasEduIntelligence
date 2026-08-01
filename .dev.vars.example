@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local `wrangler dev`. Do not commit .dev.vars.
+#
+# ADMIN_SECRET gates POST /api/admin/enroll-token, which mints learner
+# bearer tokens. Use a long random value. In production set it with:
+#   wrangler secret put ADMIN_SECRET
+ADMIN_SECRET="change-me-to-a-long-random-string"

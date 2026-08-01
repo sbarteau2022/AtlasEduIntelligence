@@ -1,0 +1,38 @@
+name = "atlas-edu"
+main = "src/index.ts"
+compatibility_date = "2026-06-02"
+# seal.ts hashes the sealed-reading chain with node:crypto's createHash.
+compatibility_flags = ["nodejs_compat"]
+
+# Serve the static marketing site (public/index.html + atlas-emblem.png).
+# Non-asset paths (e.g. /api/*) fall through to the Worker in src/index.ts.
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+# Bundle FACILITATOR.md as a Text module so src/education/index.ts can
+# `import facilitatorStance from './FACILITATOR.md'` and get its contents.
+# Typed by src/md-modules.d.ts.
+[[rules]]
+type = "Text"
+globs = ["**/*.md"]
+
+# Learner state: one JSON-document row per learner (edu_state table,
+# created lazily by ensureEduSchema). Create with:
+#   wrangler d1 create atlas-edu
+# then paste the returned database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "atlas-edu"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Bearer-token door: token -> learnerId. Create with:
+#   wrangler kv namespace create AUTH_TOKENS
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "AUTH_TOKENS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# ADMIN_SECRET is a secret, not committed here. Set it with:
+#   wrangler secret put ADMIN_SECRET
+# (and put a value in .dev.vars for local dev — see .dev.vars.example).
