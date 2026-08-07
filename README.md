@@ -61,7 +61,8 @@ The Atlas Edu worker (`src/index.ts`) is a Cloudflare Worker with two jobs:
 | Method & path | Scope | Purpose |
 | --- | --- | --- |
 | `GET /api/courses` | public | Course catalog (id + title) |
-| `POST /api/admin/enroll-token` | admin | Mint a learner bearer token (`{learner}`) |
+| `POST /api/admin/enroll-token` | admin | Mint a learner bearer token (`{learner, ttlDays?}`), rate-limited per IP |
+| `POST /api/admin/revoke-token` | admin | Revoke a learner bearer token immediately (`{token}`) |
 | `POST /api/edu/enroll` | member | Enroll (`{course?}`, defaults to `ai-engineer-stack`) |
 | `POST /api/edu/log` | member | Log a session (`{unit, minutes, evidence?, note?, blocker?}`) |
 | `POST /api/edu/seal` | member | Seal a three-tier reading (`{kind, unit?, phase?, tier1, tier2, tier3}`) |

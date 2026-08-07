@@ -19,7 +19,7 @@ import {
   eduEnroll, eduLog, eduSeal, eduBrief, eduComplete, eduStatus,
   type EduEnv,
 } from './education/index';
-import { authenticate, isAdmin, mintToken } from './auth';
+import { authenticate, isAdmin, mintToken, rateLimited, revokeToken } from './auth';
 import { toolAllowed, type Scope } from './router';
 import { localCourseFetcher } from './course-source';
 
@@ -74,12 +74,26 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   // ── admin: mint a learner token (ADMIN_SECRET bearer only) ──
   if (path === 'admin/enroll-token') {
     if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405);
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+    if (await rateLimited(env, `enroll:${ip}`, 10, 60)) return json({ error: 'too many requests' }, 429);
     if (!isAdmin(request, env)) return json({ error: 'forbidden' }, 403);
     const args = await readArgs(request);
     const learner = String(args.learner || '').trim();
     if (!learner) return json({ error: 'learner required' }, 400);
-    const token = await mintToken(env, learner);
+    const ttlDays = typeof args.ttlDays === 'number' ? args.ttlDays : undefined;
+    const token = await mintToken(env, learner, ttlDays ? ttlDays * 86400 : undefined);
     return json({ learner, token });
+  }
+
+  // ── admin: revoke a learner token (ADMIN_SECRET bearer only) ──
+  if (path === 'admin/revoke-token') {
+    if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405);
+    if (!isAdmin(request, env)) return json({ error: 'forbidden' }, 403);
+    const args = await readArgs(request);
+    const token = String(args.token || '').trim();
+    if (!token) return json({ error: 'token required' }, 400);
+    await revokeToken(env, token);
+    return json({ revoked: true });
   }
 
   // ── education tools ──

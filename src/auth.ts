@@ -29,6 +29,11 @@ export interface Principal {
 }
 
 const KEY_PREFIX = 'edu:token:';
+const RATE_PREFIX = 'edu:rl:';
+
+// The course this token door guards runs 12 months; give tokens a year-plus
+// buffer past that instead of leaving them valid forever with no way to age out.
+const DEFAULT_TOKEN_TTL_SECONDS = 400 * 24 * 60 * 60;
 
 function bearer(request: Request): string | null {
   const header = request.headers.get('Authorization') ?? '';
@@ -71,10 +76,40 @@ export function isAdmin(request: Request, env: AuthEnv): boolean {
 }
 
 /** Mint and persist a fresh learner token. Admin-only (caller must gate). */
-export async function mintToken(env: AuthEnv, learnerId: string): Promise<string> {
+export async function mintToken(
+  env: AuthEnv,
+  learnerId: string,
+  ttlSeconds: number = DEFAULT_TOKEN_TTL_SECONDS,
+): Promise<string> {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   const token = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
-  await env.AUTH_TOKENS.put(KEY_PREFIX + token, learnerId);
+  await env.AUTH_TOKENS.put(KEY_PREFIX + token, learnerId, { expirationTtl: ttlSeconds });
   return token;
+}
+
+/** Revoke a learner token immediately. Admin-only (caller must gate). */
+export async function revokeToken(env: AuthEnv, token: string): Promise<void> {
+  await env.AUTH_TOKENS.delete(KEY_PREFIX + token);
+}
+
+/**
+ * Crude fixed-window rate limit backed by AUTH_TOKENS KV: at most `max`
+ * calls per `windowSeconds` per `bucketKey` (e.g. an IP). Guards the
+ * admin token-mint route, the highest-value target on this worker, against
+ * brute-force/credential-stuffing attempts on ADMIN_SECRET.
+ */
+export async function rateLimited(
+  env: AuthEnv,
+  bucketKey: string,
+  max: number,
+  windowSeconds: number,
+): Promise<boolean> {
+  const window = Math.floor(Date.now() / 1000 / windowSeconds);
+  const key = `${RATE_PREFIX}${bucketKey}:${window}`;
+  const current = await env.AUTH_TOKENS.get(key);
+  const count = current ? Number(current) : 0;
+  if (count >= max) return true;
+  await env.AUTH_TOKENS.put(key, String(count + 1), { expirationTtl: windowSeconds * 2 });
+  return false;
 }
