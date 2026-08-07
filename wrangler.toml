@@ -36,3 +36,6 @@ id = "45ace88cdd244f40aec377fb7e2fed3c"
 # ADMIN_SECRET is a secret, not committed here. Set it with:
 #   wrangler secret put ADMIN_SECRET
 # (and put a value in .dev.vars for local dev — see .dev.vars.example).
+
+[observability]
+enabled = true
