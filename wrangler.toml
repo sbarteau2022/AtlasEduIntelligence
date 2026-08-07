@@ -1,4 +1,4 @@
-name = "atlas-edu"
+name = "atlaseduintelligence"
 main = "src/index.ts"
 compatibility_date = "2026-06-02"
 # seal.ts hashes the sealed-reading chain with node:crypto's createHash.
