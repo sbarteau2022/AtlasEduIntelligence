@@ -24,14 +24,14 @@ globs = ["**/*.md"]
 [[d1_databases]]
 binding = "DB"
 database_name = "atlas-edu"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "5290ccd5-1a0b-4e5e-a3c3-32545a77d048"
 
 # Bearer-token door: token -> learnerId. Create with:
 #   wrangler kv namespace create AUTH_TOKENS
 # then paste the returned id below.
 [[kv_namespaces]]
 binding = "AUTH_TOKENS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "45ace88cdd244f40aec377fb7e2fed3c"
 
 # ADMIN_SECRET is a secret, not committed here. Set it with:
 #   wrangler secret put ADMIN_SECRET
